@@ -1,5 +1,5 @@
 const express = require('express');
-const fetch = require('node-fetch'); // oppure fetch nativo se Node >=18
+const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 const app = express();
 const PORT = 3000;
 
@@ -9,6 +9,7 @@ let btcData = null;
 async function updateBTCData() {
   try {
     const response = await fetch("https://api.coingecko.com/api/v3/coins/bitcoin");
+    console.log("Status API:", response.status);
     const data = await response.json();
 
     const currentPrice = data.market_data.current_price.usd;
@@ -27,16 +28,17 @@ async function updateBTCData() {
 updateBTCData();
 setInterval(updateBTCData, 60000);
 
-// Endpoint per frontend
-app.get('/btc', (req, res) => {
+// Endpoint corretto per frontend
+app.get('/api/btc', (req, res) => {
   if (btcData) res.json(btcData);
   else res.status(503).json({ error: "Data not ready" });
 });
 
-// Serve i file statici (HTML, CSS, JS)
+// Serve i file statici
 app.use(express.static('public'));
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
+
 

@@ -146,7 +146,7 @@ async function fetchBTC() {
     const response = await fetch("/api/btc");
     const data = await response.json();
 
-    const currentPrice = data.currentPrice;
+    const currentPrice = data.price; // <-- cambiato da currentPrice
     const ath = data.ath;
     const progress = data.progress;
 
@@ -154,23 +154,21 @@ async function fetchBTC() {
     const progressText = document.getElementById("progress-bar-text");
 
     progressBar.style.width = progress + "%";
-    progressText.textContent = progress.toFixed(2) + "%";
+    progressText.textContent = progress + "%";
 
     document.getElementById("price").textContent = currentPrice.toLocaleString();
     document.getElementById("ath").textContent = ath.toLocaleString();
-    document.getElementById("progress").textContent = progress.toFixed(2) + "%";
+    document.getElementById("progress").textContent = progress + "%";
 
-    // I cambiamenti storici (24h, 7d, 30d) richiedono fetch lato server, opzionale
-    // Per ora li puoi lasciare statici o implementare lato server se vuoi
+    // I cambiamenti storici (24h, 7d, 30d) rimangono statici o implementabili lato server
   } catch (error) {
     console.error("Error fetching BTC data:", error);
   }
 }
 
 fetchBTC();
-// Aggiornamento automatico ogni 3 minuti, opzionale
-// setInterval(fetchBTC, 180000);
+// Aggiornamento automatico ogni 3 minuti
+setInterval(fetchBTC, 180000);
 </script>
-
 </body>
 </html>
