@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-B2V677YVZ7"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-B2V677YVZ7');
+  </script>
+  <title>Bitcoin to Zero - Live Tracker</title>
+  <meta name="description" content="Track how close Bitcoin (BTC) is to $0. Live price, ATH, and progress updates.">
+  <link href="https://fonts.googleapis.com/css2?family=Inconsolata&display=swap" rel="stylesheet">
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4997844740577162"
+     crossorigin="anonymous"></script>
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background-color: #080808;
+      font-family: 'Inconsolata', monospace;
+      color: white;
+      padding: 0 10px; /* padding generale per mobile */
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      margin-bottom: 40px;
+      text-align: center;
+    }
+
+    /* Titolo ottimizzato per smartphone */
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 1.2rem;
+        margin: 0 10px 40px 10px;
+        text-align: center;
+      }
+    }
+
+    .progress-container {
+      width: 80%;
+      max-width: 600px;
+      background-color: #333;
+      border-radius: 25px;
+      overflow: hidden;
+      box-shadow: 0 0 10px rgba(255,255,255,0.2);
+      margin-bottom: 20px;
+      position: relative;
+    }
+
+    .progress-bar {
+      height: 40px;
+      width: 0%;
+      background-color: #555;
+      transition: width 1s ease;
+    }
+
+    #progress-bar-text {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      color: orange;
+      font-weight: bold;
+      font-size: 1rem;
+      white-space: nowrap;
+    }
+
+    .info {
+      text-align: center;
+      font-size: 1rem;
+      margin-top: 10px;
+    }
+
+    .info p {
+      margin: 5px 0;
+    }
+
+    .changes {
+      text-align: center;
+      font-size: 0.85rem;
+      margin: 10px 0 20px 0;
+    }
+
+    .changes span {
+      font-weight: bold;
+    }
+
+    .changes span.positive { color: #4caf50; }
+    .changes span.negative { color: #f44336; }
+
+    .donate-button {
+      background-color: orange;
+      color: #000;
+      font-weight: bold;
+      padding: 8px 16px;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      margin-top: 10px;
+      transition: transform 0.2s, background-color 0.2s;
+    }
+
+    .donate-button:hover {
+      transform: scale(1.05);
+      background-color: #ff9f1c;
+    }
+  </style>
+</head>
+<body>
+  <h1>How Close Is Bitcoin to $0?</h1>
+
+  <div class="progress-container">
+    <div id="progress-bar" class="progress-bar"></div>
+    <span id="progress-bar-text">0%</span>
+  </div>
+
+  <div class="info">
+    <p><strong>Price:</strong> $<span id="price">Fetching data...</span></p>
+    <p><strong>ATH:</strong> $<span id="ath">Fetching data...</span></p>
+    <p><strong>Progress:</strong> <span id="progress">Fetching data...</span></p>
+  </div>
+
+  <div class="changes">
+    <p><strong>24h Progress Change:</strong> <span id="change-24h">0%</span></p>
+    <p><strong>7d Progress Change:</strong> <span id="change-7d">0%</span></p>
+    <p><strong>30d Progress Change:</strong> <span id="change-30d">0%</span></p>
+  </div>
+
+  <form action="https://buy.stripe.com/cNibJ31NK4Cze510yAcIE00" method="GET">
+    <button type="submit" class="donate-button">Support BTC to Zero Tracker</button>
+  </form>
+
+  <script>
+    async function fetchBTC() {
+      try {
+        const response = await fetch("https://api.coingecko.com/api/v3/coins/bitcoin");
+        const data = await response.json();
+
+        const currentPrice = data.market_data.current_price.usd;
+        const ath = data.market_data.ath.usd;
+
+        let progress = ((ath - currentPrice) / ath) * 100;
+        if (progress < 0) progress = 0;
+        if (progress > 100) progress = 100;
+
+        const progressBar = document.getElementById("progress-bar");
+        const progressText = document.getElementById("progress-bar-text");
+
+        progressBar.style.width = progress + "%";
+        progressText.textContent = progress.toFixed(2) + "%";
+
+        document.getElementById("price").textContent = currentPrice.toLocaleString();
+        document.getElementById("ath").textContent = ath.toLocaleString();
+        document.getElementById("progress").textContent = progress.toFixed(2) + "%";
+
+        const historyResp = await fetch("https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=30&interval=daily");
+        const historyData = await historyResp.json();
+        const prices = historyData.prices.map(p => p[1]);
+
+        const progress1d = ((ath - prices[prices.length-2]) / ath) * 100;
+        const progress7d = ((ath - prices[prices.length-8]) / ath) * 100;
+        const progress30d = ((ath - prices[0]) / ath) * 100;
+
+        const change24h = progress - progress1d;
+        const change7d = progress - progress7d;
+        const change30d = progress - progress30d;
+
+        const elem24h = document.getElementById("change-24h");
+        const elem7d = document.getElementById("change-7d");
+        const elem30d = document.getElementById("change-30d");
+
+        elem24h.textContent = (change24h >= 0 ? "+" : "") + change24h.toFixed(2) + "%";
+        elem7d.textContent = (change7d >= 0 ? "+" : "") + change7d.toFixed(2) + "%";
+        elem30d.textContent = (change30d >= 0 ? "+" : "") + change30d.toFixed(2) + "%";
+
+        elem24h.className = change24h >= 0 ? "positive" : "negative";
+        elem7d.className = change7d >= 0 ? "positive" : "negative";
+        elem30d.className = change30d >= 0 ? "positive" : "negative";
+
+      } catch (error) {
+        console.error("Error fetching BTC data:", error);
+      }
+    }
+
+    fetchBTC();
+    setInterval(fetchBTC, 10000);
+  </script>
+</body>
+</html>
