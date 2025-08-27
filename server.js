@@ -5,7 +5,10 @@ const PORT = 3000;
 
 let btcData = null;
 
-// Aggiorna dati ogni 1 minuto
+// Funzione per proteggere le variazioni da NaN
+const safeValue = (val) => isNaN(val) ? 0 : val;
+
+// Aggiorna dati ogni 5 minuti
 async function updateBTCData() {
   try {
     const response = await fetch("https://api.coingecko.com/api/v3/coins/bitcoin");
@@ -23,9 +26,11 @@ async function updateBTCData() {
     const historyData = await historyResp.json();
     const prices = historyData.prices.map(p => p[1]);
 
-    const progress1d = ((ath - prices[prices.length - 2]) / ath) * 100;
-    const progress7d = ((ath - prices[prices.length - 8]) / ath) * 100;
-    const progress30d = ((ath - prices[0]) / ath) * 100;
+    // Protezione array vuoti o incompleti
+    const lastIndex = prices.length - 1;
+    const progress1d = lastIndex >= 1 ? ((ath - prices[lastIndex - 1]) / ath) * 100 : progress;
+    const progress7d = lastIndex >= 7 ? ((ath - prices[lastIndex - 7]) / ath) * 100 : progress;
+    const progress30d = lastIndex >= 29 ? ((ath - prices[0]) / ath) * 100 : progress;
 
     const change24h = (progress - progress1d).toFixed(2);
     const change7d = (progress - progress7d).toFixed(2);
@@ -35,9 +40,9 @@ async function updateBTCData() {
       price: currentPrice, 
       ath: ath, 
       progress: progress.toFixed(2),
-      change24h: change24h,
-      change7d: change7d,
-      change30d: change30d
+      change24h: safeValue(change24h),
+      change7d: safeValue(change7d),
+      change30d: safeValue(change30d)
     };
 
     console.log("BTC data updated:", btcData);
@@ -48,7 +53,7 @@ async function updateBTCData() {
 }
 
 updateBTCData();
-setInterval(updateBTCData, 300000);
+setInterval(updateBTCData, 300000); // ogni 5 minuti
 
 // Endpoint per frontend
 app.get('/api/btc', (req, res) => {
