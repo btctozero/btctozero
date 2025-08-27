@@ -60,7 +60,7 @@ async function updateBTCData() {
 }
 
 updateBTCData();
-setInterval(updateBTCData, 24 * 60 * 60 * 1000); // 24h in ms
+setInterval(updateBTCData, 10 * 60 * 1000); // ogni 10 minuti
 
 // Endpoint per frontend
 app.get('/api/btc', (req, res) => {
