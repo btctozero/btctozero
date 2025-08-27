@@ -136,7 +136,7 @@
     <p><strong>30d Progress Change:</strong> <span id="change-30d">0%</span></p>
   </div>
 
-  <form action="https://buy.stripe.com/cNibJ31NK4Cze510yAcIE00" method="GET">
+  <form action="https://www.paypal.com/ncp/payment/LQEXV7ZCS4CKL" method="GET" target="_blank">
     <button type="submit" class="donate-button">Support BTC to Zero Tracker</button>
   </form>
 
@@ -146,29 +146,32 @@ async function fetchBTC() {
     const response = await fetch("/api/btc");
     const data = await response.json();
 
-    const currentPrice = data.price; // <-- cambiato da currentPrice
+    const currentPrice = data.price;
     const ath = data.ath;
     const progress = data.progress;
 
-    const progressBar = document.getElementById("progress-bar");
-    const progressText = document.getElementById("progress-bar-text");
-
-    progressBar.style.width = progress + "%";
-    progressText.textContent = progress + "%";
-
+    document.getElementById("progress-bar").style.width = progress + "%";
+    document.getElementById("progress-bar-text").textContent = progress + "%";
     document.getElementById("price").textContent = currentPrice.toLocaleString();
     document.getElementById("ath").textContent = ath.toLocaleString();
     document.getElementById("progress").textContent = progress + "%";
 
-    // I cambiamenti storici (24h, 7d, 30d) rimangono statici o implementabili lato server
+    // Aggiorna le variazioni
+    document.getElementById("change-24h").textContent = (data.change24h >= 0 ? "+" : "") + data.change24h + "%";
+    document.getElementById("change-7d").textContent = (data.change7d >= 0 ? "+" : "") + data.change7d + "%";
+    document.getElementById("change-30d").textContent = (data.change30d >= 0 ? "+" : "") + data.change30d + "%";
+
+    document.getElementById("change-24h").className = data.change24h >= 0 ? "positive" : "negative";
+    document.getElementById("change-7d").className = data.change7d >= 0 ? "positive" : "negative";
+    document.getElementById("change-30d").className = data.change30d >= 0 ? "positive" : "negative";
+
   } catch (error) {
     console.error("Error fetching BTC data:", error);
   }
 }
 
 fetchBTC();
-// Aggiornamento automatico ogni 3 minuti
-setInterval(fetchBTC, 180000);
+setInterval(fetchBTC, 300000); // Aggiornamento ogni 5 minuti lato frontend
 </script>
 </body>
 </html>

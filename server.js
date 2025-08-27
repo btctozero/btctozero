@@ -18,17 +18,39 @@ async function updateBTCData() {
     if (progress < 0) progress = 0;
     if (progress > 100) progress = 100;
 
-    btcData = { price: currentPrice, ath: ath, progress: progress.toFixed(2) };
+    // Fetch storico 30 giorni per calcolare variazioni
+    const historyResp = await fetch("https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=30&interval=daily");
+    const historyData = await historyResp.json();
+    const prices = historyData.prices.map(p => p[1]);
+
+    const progress1d = ((ath - prices[prices.length - 2]) / ath) * 100;
+    const progress7d = ((ath - prices[prices.length - 8]) / ath) * 100;
+    const progress30d = ((ath - prices[0]) / ath) * 100;
+
+    const change24h = (progress - progress1d).toFixed(2);
+    const change7d = (progress - progress7d).toFixed(2);
+    const change30d = (progress - progress30d).toFixed(2);
+
+    btcData = { 
+      price: currentPrice, 
+      ath: ath, 
+      progress: progress.toFixed(2),
+      change24h: change24h,
+      change7d: change7d,
+      change30d: change30d
+    };
+
     console.log("BTC data updated:", btcData);
+
   } catch (err) {
     console.error("Errore fetch BTC:", err);
   }
 }
 
 updateBTCData();
-setInterval(updateBTCData, 60000);
+setInterval(updateBTCData, 300000);
 
-// Endpoint corretto per frontend
+// Endpoint per frontend
 app.get('/api/btc', (req, res) => {
   if (btcData) res.json(btcData);
   else res.status(503).json({ error: "Data not ready" });
@@ -40,5 +62,4 @@ app.use(express.static('public'));
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
-
 
