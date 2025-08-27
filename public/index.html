@@ -171,7 +171,7 @@ async function fetchBTC() {
 }
 
 fetchBTC();
-setInterval(fetchBTC, 300000); // Aggiornamento ogni 5 minuti lato frontend
+setInterval(fetchBTC, 60 * 60 * 1000); // Aggiornamento ogni ora lato frontend
 </script>
 </body>
 </html>

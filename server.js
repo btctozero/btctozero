@@ -3,7 +3,14 @@ const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch
 const app = express();
 const PORT = 3000;
 
-let btcData = null;
+let btcData = {
+  price: 0,
+  ath: 0,
+  progress: 0,
+  change24h: 0,
+  change7d: 0,
+  change30d: 0
+};
 
 // Funzione per proteggere le variazioni da NaN
 const safeValue = (val) => isNaN(val) ? 0 : val;
@@ -53,7 +60,7 @@ async function updateBTCData() {
 }
 
 updateBTCData();
-setInterval(updateBTCData, 300000); // ogni 5 minuti
+setInterval(updateBTCData, 24 * 60 * 60 * 1000); // 24h in ms
 
 // Endpoint per frontend
 app.get('/api/btc', (req, res) => {
