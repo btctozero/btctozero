@@ -150,6 +150,7 @@
     <p><strong>Price:</strong> $<span id="price">Fetching data...</span></p>
     <p><strong>ATH:</strong> $<span id="ath">Fetching data...</span></p>
     <p><strong>Progress:</strong> <span id="progress">Fetching data...</span></p>
+    <p><strong style="color:#FF0000;">Max Progress (Red Line):</strong> <span id="max-progress" style="color:#FF0000;">0%</span></p>
   </div>
 
   <div class="changes">
@@ -179,30 +180,43 @@ async function fetchBTC() {
     document.getElementById("progress").textContent = progress + "%";
 
     const minMarker = document.getElementById("min-since-ath-marker");
-    if (data.minSinceATH !== undefined) {
-      const redLine = ((ath - data.minSinceATH) / ath) * 100;
-      minMarker.style.left = redLine + "%";
-      const tooltip = document.getElementById("min-tooltip");
-      const progressContainer = document.querySelector(".progress-container");
+if (data.minSinceATH !== undefined) {
+    const redLine = ((ath - data.minSinceATH) / ath) * 100;
+    minMarker.style.left = redLine + "%";
+    document.getElementById("max-progress").textContent = redLine.toFixed(2) + "%";
 
-      // Tooltip al passaggio del mouse
-      progressContainer.addEventListener("mouseenter", () => {
-      tooltip.style.display = "block";
-      tooltip.style.left = redLine + "%";
-      tooltip.style.top = "-10px";
+    const tooltip = document.getElementById("min-tooltip");
+    const progressContainer = document.querySelector(".progress-container");
 
-  // Data e ora del minimo (assicurati che il server restituisca minSinceATHDate)
-  const minDate = new Date(data.minSinceATHDate);
-  const formattedDate = `${minDate.toLocaleDateString()} ${minDate.getHours()}:${minDate.getMinutes().toString().padStart(2,'0')}`;
+    // Rimuoviamo eventuali listener precedenti per evitare duplicati
+    progressContainer.onmouseenter = null;
+    progressContainer.onmouseleave = null;
+    progressContainer.ontouchstart = null;
+    progressContainer.ontouchend = null;
 
-  tooltip.textContent = `Max % Progress Bar: ${redLine.toFixed(2)}% | ${formattedDate} | $${data.minSinceATH.toLocaleString()}`;
-});
+    const showTooltip = () => {
+        tooltip.style.display = "block";
+        tooltip.style.left = redLine + "%";
+        tooltip.style.top = "-10px";
 
-progressContainer.addEventListener("mouseleave", () => {
-  tooltip.style.display = "none";
-});
+        const minDate = new Date(data.minSinceATHDate);
+        const formattedDate = `${minDate.toLocaleDateString()} ${minDate.getHours()}:${minDate.getMinutes().toString().padStart(2,'0')}`;
 
-    }
+        tooltip.textContent = `Max % Progress Bar: ${redLine.toFixed(2)}% | ${formattedDate} | $${data.minSinceATH.toLocaleString()}`;
+    };
+
+    const hideTooltip = () => {
+        tooltip.style.display = "none";
+    };
+
+    // Mouse events
+    progressContainer.addEventListener("mouseenter", showTooltip);
+    progressContainer.addEventListener("mouseleave", hideTooltip);
+
+    // Touch events (mobile)
+    progressContainer.addEventListener("touchstart", showTooltip);
+    progressContainer.addEventListener("touchend", hideTooltip);
+}
 
     // Aggiorna le variazioni
     document.getElementById("change-24h").textContent = (data.change24h >= 0 ? "+" : "") + data.change24h + "%";
