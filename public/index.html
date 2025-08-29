@@ -141,8 +141,10 @@
       display: none;
       pointer-events: none;
       white-space: nowrap;
-      transform: translate(-50%, -120%);
-"></div>
+      transform: translateX(-50%);
+      z-index: 10;
+  "></div>
+
 
   </div>
 
@@ -177,7 +179,7 @@ const showTooltip = () => {
   if (!currentMinData) return;
   tooltip.style.display = "block";
   tooltip.style.left = currentRedLine + "%";
-  tooltip.style.top = "-10px";
+  tooltip.style.top = "-4px";
 
   const minDate = new Date(currentMinData.minSinceATHDate);
   const formattedDate = `${minDate.toLocaleDateString()} ${minDate.getHours()}:${minDate.getMinutes().toString().padStart(2,'0')}`;
