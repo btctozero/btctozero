@@ -74,6 +74,23 @@
       white-space: nowrap;
     }
 
+    #min-tooltip {
+  position: absolute;
+  padding: 4px 8px;
+  background-color: rgba(0,0,0,0.85);
+  color: white;
+  font-size: 0.8rem;
+  border-radius: 6px;
+  display: none;
+  pointer-events: none;
+  white-space: nowrap;
+  max-width: 150px;
+  text-align: center;
+  transform: translateX(-50%);
+  z-index: 10;
+}
+
+
     .info {
       text-align: center;
       font-size: 1rem;
@@ -131,32 +148,20 @@
       transition: left 1s ease;
 "></span>
     <span id="progress-bar-text">0%</span>
-    <div id="min-tooltip" style="
-      position: absolute;
-      padding: 6px 10px;
-      background-color: #222;
-      color: white;
-      font-size: 0.8rem;
-      border-radius: 6px;
-      display: none;
-      pointer-events: none;
-      white-space: nowrap;
-      transform: translateX(-50%);
-      z-index: 10;
-  "></div>
-
+    <div id="min-tooltip"></div>
 
   </div>
 
- <div class="info">
+<div class="info">
   <p><strong>Price:</strong> $<span id="price">Fetching data...</span></p>
   <p><strong>ATH:</strong> $<span id="ath">Fetching data...</span></p>
   <p><strong>Progress:</strong> <span id="progress">Fetching data...</span></p>
-  <p><strong style="color:#93ffb3;">Max Progress (Green Line):</strong> 
+  <p style="font-size: 1rem;"><strong style="color:#93ffb3;">Max Progress (Green Line):</strong> 
     <span id="max-progress" style="color:#ffffff;">0%</span>
     <span id="max-progress-date" style="color:#ffffff; margin-left:6px;"></span>
   </p>
 </div>
+
 
 
   <div class="changes">
@@ -182,14 +187,19 @@ let currentMinData = null;
 const showTooltip = () => {
   if (!currentMinData) return;
   tooltip.style.display = "block";
-  tooltip.style.left = currentRedLine + "%";
+  let leftPos = (currentRedLine / 100) * progressContainer.offsetWidth;
+  const tooltipWidth = tooltip.offsetWidth;
+  if (leftPos - tooltipWidth / 2 < 0) {
+    leftPos = tooltipWidth / 2;
+  } else if (leftPos + tooltipWidth / 2 > progressContainer.offsetWidth) {
+    leftPos = progressContainer.offsetWidth - tooltipWidth / 2;
+  }
+  tooltip.style.left = leftPos + "px";
   tooltip.style.top = "-4px";
 
-  const minDate = new Date(currentMinData.minSinceATHDate);
-  const formattedDate = `${minDate.toLocaleDateString()} ${minDate.getHours()}:${minDate.getMinutes().toString().padStart(2,'0')}`;
-
-  tooltip.textContent = `Max % Progress Bar: ${currentRedLine.toFixed(2)}% | ${formattedDate} | $${currentMinData.minSinceATH.toLocaleString()}`;
+  tooltip.textContent = `Max: ${currentRedLine.toFixed(2)}% | $${currentMinData.minSinceATH.toLocaleString()}`;
 };
+
 const hideTooltip = () => tooltip.style.display = "none";
 
 progressContainer.addEventListener("mouseenter", showTooltip);
