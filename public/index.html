@@ -121,6 +121,15 @@
 
   <div class="progress-container">
     <div id="progress-bar" class="progress-bar"></div>
+    <span id="min-since-ath-marker" style="
+      position: absolute;
+      height: 40px;
+      width: 2px;
+      background-color: red;
+      top: 0;
+      left: 0;
+      transition: left 1s ease;
+"></span>
     <span id="progress-bar-text">0%</span>
   </div>
 
@@ -155,6 +164,12 @@ async function fetchBTC() {
     document.getElementById("price").textContent = currentPrice.toLocaleString();
     document.getElementById("ath").textContent = ath.toLocaleString();
     document.getElementById("progress").textContent = progress + "%";
+
+    const minMarker = document.getElementById("min-since-ath-marker");
+    if (data.minSinceATH !== undefined) {
+      const redLine = ((ath - data.minSinceATH) / ath) * 100;
+      minMarker.style.left = redLine + "%";
+    }
 
     // Aggiorna le variazioni
     document.getElementById("change-24h").textContent = (data.change24h >= 0 ? "+" : "") + data.change24h + "%";

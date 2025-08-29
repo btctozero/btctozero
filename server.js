@@ -28,6 +28,18 @@ async function updateBTCData() {
     if (progress < 0) progress = 0;
     if (progress > 100) progress = 100;
 
+
+    // --- Calcolo minimo dal giorno ATH ---
+    const athDateStr = data.market_data.ath_date.usd;
+    const athDate = new Date(athDateStr);
+    const today = new Date();
+    const diffDays = Math.ceil((today - athDate) / (1000 * 60 * 60 * 24));
+
+    const athHistoryResp = await fetch(`https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=${diffDays}&interval=daily`);
+    const athHistoryData = await athHistoryResp.json();
+    const pricesSinceATH = athHistoryData.prices.map(p => p[1]);
+    const minSinceATH = Math.min(...pricesSinceATH);
+
     // Fetch storico 30 giorni per calcolare variazioni
     const historyResp = await fetch("https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=30&interval=daily");
     const historyData = await historyResp.json();
@@ -43,14 +55,16 @@ async function updateBTCData() {
     const change7d = (progress - progress7d).toFixed(2);
     const change30d = (progress - progress30d).toFixed(2);
 
-    btcData = { 
+   btcData = { 
       price: currentPrice, 
       ath: ath, 
       progress: progress.toFixed(2),
       change24h: safeValue(change24h),
       change7d: safeValue(change7d),
-      change30d: safeValue(change30d)
+      change30d: safeValue(change30d),
+      minSinceATH: minSinceATH
     };
+
 
     console.log("BTC data updated:", btcData);
 
