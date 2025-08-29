@@ -39,6 +39,9 @@ async function updateBTCData() {
     const athHistoryData = await athHistoryResp.json();
     const pricesSinceATH = athHistoryData.prices.map(p => p[1]);
     const minSinceATH = Math.min(...pricesSinceATH);
+    const minIndex = pricesSinceATH.indexOf(minSinceATH);
+    const minSinceATHDate = new Date(athHistoryData.prices[minIndex][0]); // timestamp in ms
+
 
     // Fetch storico 30 giorni per calcolare variazioni
     const historyResp = await fetch("https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=30&interval=daily");
@@ -62,7 +65,8 @@ async function updateBTCData() {
       change24h: safeValue(change24h),
       change7d: safeValue(change7d),
       change30d: safeValue(change30d),
-      minSinceATH: minSinceATH
+      minSinceATH: minSinceATH,
+      minSinceATHDate: minSinceATHDate
     };
 
 
