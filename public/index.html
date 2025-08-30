@@ -185,24 +185,34 @@ const tooltip = document.getElementById("min-tooltip");
 const progressContainer = document.querySelector(".progress-container");
 const maxProgress = document.getElementById("max-progress");
 
-let currentRedLine = 0;
+let previousRedLine = 0;   // Per impedire alla barra verde di tornare indietro
 let currentMinData = null;
 
 // Tooltip
 const showTooltip = () => {
   if (!currentMinData) return;
   tooltip.style.display = "block";
-  let leftPos = (currentRedLine / 100) * progressContainer.offsetWidth;
+
+  let leftPos = (previousRedLine / 100) * progressContainer.offsetWidth;
   const tooltipWidth = tooltip.offsetWidth;
+
   if (leftPos - tooltipWidth / 2 < 0) {
     leftPos = tooltipWidth / 2;
   } else if (leftPos + tooltipWidth / 2 > progressContainer.offsetWidth) {
     leftPos = progressContainer.offsetWidth - tooltipWidth / 2;
   }
+
   tooltip.style.left = leftPos + "px";
   tooltip.style.top = "-4px";
 
-  tooltip.textContent = `Max: ${currentRedLine.toFixed(2)}% | $${currentMinData.minSinceATH.toLocaleString()}`;
+  const minDate = new Date(currentMinData.minSinceATHDate);
+  const formattedDate = minDate.toLocaleDateString("en-US", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  }) + `, ${minDate.getHours()}:${minDate.getMinutes().toString().padStart(2,"0")}`;
+
+  tooltip.textContent = `Max Progress: ${previousRedLine.toFixed(2)}% | $${currentMinData.minSinceATH.toLocaleString()} (${formattedDate})`;
 };
 
 const hideTooltip = () => tooltip.style.display = "none";
@@ -217,32 +227,26 @@ async function fetchBTC() {
     const response = await fetch("/api/btc");
     const data = await response.json();
 
-    const currentPrice = data.price;
-    const ath = data.ath;
-    const progress = data.progress;
+    // Barra principale (progresso attuale)
+    document.getElementById("progress-bar").style.width = data.progress + "%";
+    document.getElementById("progress-bar-text").textContent = data.progress + "%";
+    document.getElementById("price").textContent = data.price.toLocaleString();
+    document.getElementById("ath").textContent = data.ath.toLocaleString();
+    document.getElementById("progress").textContent = data.progress + "%";
 
-    document.getElementById("progress-bar").style.width = progress + "%";
-    document.getElementById("progress-bar-text").textContent = progress + "%";
-    document.getElementById("price").textContent = currentPrice.toLocaleString();
-    document.getElementById("ath").textContent = ath.toLocaleString();
-    document.getElementById("progress").textContent = progress + "%";
-
+    // Marker verde (minimo assoluto dall'ATH)
     if (data.minSinceATH !== undefined) {
-  currentRedLine = ((ath - data.minSinceATH) / ath) * 100;
-  minMarker.style.left = currentRedLine + "%";
-  maxProgress.textContent = currentRedLine.toFixed(2) + "%";
-  currentMinData = data;
+      const newRedLine = ((data.ath - data.minSinceATH) / data.ath) * 100;
 
-  // formatta la data
-  const minDate = new Date(data.minSinceATHDate);
-  const formattedDate = minDate.toLocaleDateString("en-US", {
-    day: "2-digit",
-    month: "long",
-    year: "numeric",
-  }) + `, ${minDate.getHours()}:${minDate.getMinutes().toString().padStart(2,"0")}`;
+      // Aggiorna solo se aumenta (non torna mai indietro)
+      if (newRedLine > previousRedLine) {
+        previousRedLine = newRedLine;
+      }
 
-  document.getElementById("max-progress-date").textContent = `(${formattedDate})`;
-}
+      minMarker.style.left = previousRedLine + "%";
+      maxProgress.textContent = previousRedLine.toFixed(2) + "%";
+      currentMinData = data;
+    }
 
     // Aggiorna variazioni
     document.getElementById("change-24h").textContent = (data.change24h >= 0 ? "+" : "") + data.change24h + "%";
