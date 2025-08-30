@@ -212,7 +212,7 @@ const showTooltip = () => {
     year: "numeric",
   }) + `, ${minDate.getHours()}:${minDate.getMinutes().toString().padStart(2,"0")}`;
 
-  tooltip.textContent = `Max Progress: ${previousRedLine.toFixed(2)}% | $${currentMinData.minSinceATH.toLocaleString()} (${formattedDate})`;
+  tooltip.textContent = `Max Progress: ${previousRedLine.toFixed(2)}% | $${currentMinData.minSinceATH.toLocaleString()}`;
 };
 
 const hideTooltip = () => tooltip.style.display = "none";
@@ -249,9 +249,10 @@ async function fetchBTC() {
     }
 
     // Aggiorna variazioni
-    document.getElementById("change-24h").textContent = (data.change24h >= 0 ? "+" : "") + data.change24h + "%";
-    document.getElementById("change-7d").textContent = (data.change7d >= 0 ? "+" : "") + data.change7d + "%";
-    document.getElementById("change-30d").textContent = (data.change30d >= 0 ? "+" : "") + data.change30d + "%";
+    document.getElementById("change-24h").textContent = (data.change24h >= 0 ? "+" : "") + data.change24h.toFixed(2) + "%";
+    document.getElementById("change-7d").textContent = (data.change7d >= 0 ? "+" : "") + data.change7d.toFixed(2) + "%";
+    document.getElementById("change-30d").textContent = (data.change30d >= 0 ? "+" : "") + data.change30d.toFixed(2) + "%";
+
 
     document.getElementById("change-24h").className = data.change24h >= 0 ? "positive" : "negative";
     document.getElementById("change-7d").className = data.change7d >= 0 ? "positive" : "negative";
