@@ -54,20 +54,20 @@ async function updateBTCData() {
     const progress7d = lastIndex >= 7 ? ((ath - prices[lastIndex - 7]) / ath) * 100 : progress;
     const progress30d = lastIndex >= 29 ? ((ath - prices[0]) / ath) * 100 : progress;
 
-    const change24h = (progress - progress1d).toFixed(2);
-    const change7d = (progress - progress7d).toFixed(2);
-    const change30d = (progress - progress30d).toFixed(2);
+ 	const change24h = safeValue(progress - progress1d);
+	const change7d  = safeValue(progress - progress7d);
+	const change30d = safeValue(progress - progress30d);
 
    btcData = { 
-      price: currentPrice, 
-      ath: ath, 
-      progress: progress.toFixed(2),
-      change24h: safeValue(change24h),
-      change7d: safeValue(change7d),
-      change30d: safeValue(change30d),
-      minSinceATH: minSinceATH,
-      minSinceATHDate: minSinceATHDate
-    };
+  	price: currentPrice, 
+  	ath: ath, 
+  	progress: Number(progress.toFixed(2)), // solo progress va arrotondato qui
+  	change24h: change24h,
+  	change7d: change7d,
+  	change30d: change30d,
+  	minSinceATH: minSinceATH,
+  	minSinceATHDate: minSinceATHDate
+};
 
 
     console.log("BTC data updated:", btcData);
